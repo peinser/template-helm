@@ -51,15 +51,12 @@ jobs:
       uses: azure/setup-helm@v3
 
     - if: ${{ vars.HELM_OCI_REGISTRY != '' }}
-      name: 'Authorize Helm with remote container registry'
-      run: |
-        echo ${{ secrets.HELM_OCI_SECRET }} | helm registry login -u ${{ vars.HELM_OCI_USERNAME }} --password-stdin ${{ vars.HELM_OCI_REGISTRY }}
-
-    - if: ${{ vars.HELM_OCI_REGISTRY != '' }}
       name: 'Push modified Helm packages to the container registry'
       env:
         HELM_EXPERIMENTAL_OCI: '1'
       run: |
+        echo ${{ secrets.HELM_OCI_SECRET }} | helm registry login -u ${{ vars.HELM_OCI_USERNAME }} --password-stdin ${{ vars.HELM_OCI_REGISTRY }}
+
         git pull origin main  # Pull latest changes from main.
         git diff --name-only -r HEAD^1 HEAD | grep .tgz | while read line || [[ -n $line ]];
         do
