@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ .Release.Name }}-sample
+  name: {{ .Release.Name }}-sample
+spec:
+  replicas: {{ .Values.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-sample
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-sample
+    spec:
+      automountServiceAccountToken: false
+
+      {{- with .Values.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+
+      containers:
+
+      - image: docker.io/{{ .Values.image.name | default "peinser/sample" }}:{{ .Values.image.tag | default "latest" }}
+        imagePullPolicy: Always
+        resources:
+          {{- if .Values.resources }}
+{{ toYaml .Values.resources | indent 12 }}
+          {{- else }}
+            limits: {}
+          {{- end }}
+        name: {{ .Release.Name }}-sample
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          runAsNonRoot: true
+        env:
+        - name: SOME_VARIABLE
+          value: {{ .Values.someVariable | default someValue | quote }}

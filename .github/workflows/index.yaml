@@ -1,0 +1,62 @@
+name: Update Helm repository
+run-name: ${{ github.actor }} is updating the Helm repository
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+    paths:
+    - charts/**
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: 'Git Checkout'
+      uses: actions/checkout@v3
+
+
+    - name: 'Configure & Install Helm'
+      uses: azure/setup-helm@v3
+
+    - name: 'Package & Update Helm Repository'
+      run: |
+        helm package charts/* -d repo/
+        helm repo index repo/
+        git config --global user.name "${GITHUB_ACTOR}"
+        git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+        git add repo
+        git commit -m 'Update Helm repository chart index'
+        git push
+
+  release:
+    runs-on: ubuntu-latest
+    needs: package
+
+    steps:
+
+    - name: 'Git Checkout'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: 'Configure & Install Helm'
+      uses: azure/setup-helm@v3
+
+    - name: 'Authorize Helm with remote container registry''
+      run: |
+        echo "TODO"
+
+    - name: 'Push modified Helm packages to the container registry'
+      env:
+        HELM_EXPERIMENTAL_OCI: '1'
+      run: |
+        git pull origin main  # Pull latest changes from main.
+        git diff --name-only -r HEAD^1 HEAD | grep .tgz | while read line || [[ -n $line ]];
+        do
+            echo " > Pushing chart $line"
+            helm push $line oci://nexus.global.dns:8443/charts/charts
+        done

@@ -1,0 +1,23 @@
+securityContext:
+  runAsUser: 1001
+  runAsGroup: 1001
+  fsGroup: 1001
+
+replicas: 1
+
+resources:
+  requests:
+    cpu: 64m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
+
+image:
+  name: peinser/sample
+  tag: 1.0.0
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
