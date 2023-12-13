@@ -9,8 +9,26 @@ A template repository for managing Helm charts specific to a single project.
 
 ## Configuration
 
-## Changelogs
+### GitHub
 
+#### HTTP
+
+```bash
+helm repo add reponame https://raw.githubusercontent.com/peinser/template-helm/main/repo
+```
+
+The above only works for public repositories. Otherwise, registry credentials such as SSH keys or a PAT are required.
+
+#### OCI Artifact
+
+Alternatively, it is possible to configure an OCI compatible container registry to manage Helm charts. To enable
+this behaviour, the following variables (and secret) have to be defined:
+
+- `HELM_OCI_REGISTRY`
+- `HELM_OCI_USERNAME`
+- `HELM_OCI_SECRET`
+
+## Changelogs
 
 ## Conventions
 

@@ -10,6 +10,7 @@ on:
     - charts/**
 
 jobs:
+
   package:
     runs-on: ubuntu-latest
 
@@ -17,7 +18,8 @@ jobs:
 
     - name: 'Git Checkout'
       uses: actions/checkout@v3
-
+      with:
+        fetch-depth: 0
 
     - name: 'Configure & Install Helm'
       uses: azure/setup-helm@v3
@@ -38,25 +40,28 @@ jobs:
 
     steps:
 
-    - name: 'Git Checkout'
+    - if: ${{ vars.HELM_OCI_REGISTRY != '' }}
+      name: 'Git Checkout'
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
-    - name: 'Configure & Install Helm'
+    - if: ${{ vars.HELM_OCI_REGISTRY != '' }}
+      name: 'Configure & Install Helm'
       uses: azure/setup-helm@v3
 
-    - name: 'Authorize Helm with remote container registry'
+    - if: ${{ vars.HELM_OCI_REGISTRY != '' }}
+      name: 'Authorize Helm with remote container registry'
       run: |
-        echo "TODO"
+        echo ${{ secrets.HELM_OCI_SECRET }} | helm registry login -u ${{ vars.HELM_OCI_USERNAME }} --password-stdin ${{ vars.HELM_OCI_REGISTRY }}
 
-    - name: 'Push modified Helm packages to the container registry'
+    - if: ${{ vars.HELM_OCI_REGISTRY != '' }}
+      name: 'Push modified Helm packages to the container registry'
       env:
         HELM_EXPERIMENTAL_OCI: '1'
       run: |
         git pull origin main  # Pull latest changes from main.
         git diff --name-only -r HEAD^1 HEAD | grep .tgz | while read line || [[ -n $line ]];
         do
-            echo " > Pushing chart $line"
-            helm push $line oci://nexus.global.dns:8443/charts/charts
+            helm push $line oci://${{ vars.HELM_OCI_REGISTRY }}
         done
