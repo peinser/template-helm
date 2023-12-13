@@ -1,4 +1,5 @@
-name: Release Helm Chart
+name: Release Helm Charts
+run-name: ${{ github.actor }} is updating the Helm repository
 
 on:
   workflow_dispatch:
@@ -15,45 +16,34 @@ on:
 
 jobs:
     release:
-        runs-on:
-          group: k8s-runners
+        runs-on: ubuntu-latest
+
         steps:
-        # 1. Checkout the current Git repository.
+
         - name: 'Git Checkout'
           uses: actions/checkout@v3
           with:
             fetch-depth: 0
-    
-        # 2. Configure Helm
+
         - name: 'Configure & Install Helm'
           uses: azure/setup-helm@v3
-    
-        # 3. Authorize Helm with Nexus
-        - name: 'Authorize Helm with Nexus'
-          run: |
-            echo ${{ secrets.NEXUS_PASSWORD}} | helm registry login -u ${{ secrets.NEXUS_USERNAME }} --password-stdin \
-            nexus.global.dns:8443/adcs/charts
-    
-        # 4. Push changed Helm packages to Nexus.
-        - name: 'Push modified Helm packages to Nexus'
+
+        - name: 'Push modified Helm packages to the container registry'
           if: "${{ github.event.inputs.release_all == 'false' }}"
           env:
             HELM_EXPERIMENTAL_OCI: '1'
           run: |
             git diff --name-only -r HEAD^1 HEAD | grep .tgz | while read line || [[ -n $line ]];
             do
-                echo " > Pushing chart $line"
-                helm push $line oci://nexus.global.dns:8443/adcs/charts
+                helm push $line oci://TODO
             done
-    
-        # 5. Check if all Helm charts have to be pushed to Nexus.
-        - name: 'Push all Helm charts to Nexus'
+
+        - name: 'Push all Helm charts to the container registry'
           if: "${{ github.event.inputs.release_all != 'false' }}"
           env:
             HELM_EXPERIMENTAL_OCI: '1'
           run: |
             ls repo | grep .tgz | while read line || [[ -n $line ]];
             do
-                echo " > Pushing chart $line"
-                helm push repo/$line oci://nexus.global.dns:8443/adcs/charts
+                helm push repo/$line oci://TODO
             done

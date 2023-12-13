@@ -46,7 +46,7 @@ jobs:
     - name: 'Configure & Install Helm'
       uses: azure/setup-helm@v3
 
-    - name: 'Authorize Helm with remote container registry''
+    - name: 'Authorize Helm with remote container registry'
       run: |
         echo "TODO"
 
