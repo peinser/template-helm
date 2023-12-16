@@ -11,6 +11,10 @@ A template repository for managing Helm charts specific to a single project.
 
 ### GitHub
 
+### GitLab
+
+A group or project access token needs to be created with the name `cicd`. The token should have the `write_repository` permissions.
+
 #### HTTP
 
 ```bash

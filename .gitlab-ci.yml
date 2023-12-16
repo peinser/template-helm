@@ -1,0 +1,27 @@
+deploy:
+  only:
+    changes:
+    - charts/**/*
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: 0
+    HELM_EXPERIMENTAL_OCI: 1
+  image:
+    name: harbor.peinser.com/dockerhub/alpine/helm
+  before_script:
+  - git config --global user.name "${GITLAB_USER_NAME}"
+  - git config --global user.email "${GITLAB_USER_EMAIL}"
+  - git config pull.rebase false
+  - git remote set-url origin "$CI_SERVER_PROTOCOL://cicd:$PROJECT_ACCESS_TOKEN@$CI_SERVER_HOST:$CI_SERVER_PORT/$CI_PROJECT_PATH.git"
+  script:
+  - helm package charts/* -d repo/
+  - helm repo index repo/
+  - git add repo
+  - git commit -m "$CI_COMMIT_MESSAGE"
+  - git push origin HEAD:$CI_COMMIT_REF_NAME -o ci.skip
+  - echo $HELM_OCI_SECRET | helm registry login -u "$HELM_OCI_USERNAME" --password-stdin $HELM_OCI_REGISTRY
+  - |
+    git diff --name-only -r HEAD^1 HEAD | grep .tgz | while read line || [[ -n $line ]];
+    do
+      helm push $line oci://$HELM_OCI_REGISTRY
+    done
