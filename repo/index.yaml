@@ -3,9 +3,9 @@ entries:
   sample:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2023-12-13T22:56:23.936067427Z"
+    created: "2023-12-13T23:07:14.950300229Z"
     description: A sample Helm chart.
-    digest: e994cefb511475a745c2a87a401887372165276531ecc2382c745cbe9e1ca1cc
+    digest: 3d008f37e18ff4aced5dfbd710e8d781e1fb74bc92da336f954de131d45ec2da
     maintainers:
     - email: joeri@peinser.com
       name: Joeri Hermans
@@ -14,4 +14,4 @@ entries:
     urls:
     - sample-1.0.0.tgz
     version: 1.0.0
-generated: "2023-12-13T22:56:23.935719546Z"
+generated: "2023-12-13T23:07:14.949968109Z"
